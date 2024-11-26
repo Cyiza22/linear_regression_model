@@ -6,17 +6,27 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import numpy as np
 
-# Load dataset and train model
-data = pd.read_csv("Student_Lifestyle_Dataset.csv")  # Replace with your dataset name
+# Load the dataset
+data = pd.read_csv("Student_Lifestyle_Dataset.csv")
 
-# Example: Assume 'feature1', 'feature2' as predictors, and 'target' as the outcome
-X = data[["feature1", "feature2"]]  # Replace with actual column names
-y = data["target"]  # Replace with actual column name
+# Standardize column names for consistency
+data.columns = data.columns.str.strip().str.lower().str.replace(" ", "_")
 
-# Train-test split and model fitting
+# Define predictors and target
+X = data[['study_hours', 'physical_activity_hours']]  # Predictors
+y = data['cgpa']  # Target variable
+
+# Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fit the Linear Regression model
 model = LinearRegression()
 model.fit(X_train, y_train)
+
+# Output results
+print("Model training complete!")
+print("Model Coefficients:", model.coef_)
+print("Model Intercept:", model.intercept_)
 
 # Define FastAPI app
 app = FastAPI(title="Prediction API", description="A simple API to predict target values", version="1.0")
@@ -43,7 +53,11 @@ def predict(input_data: PredictionInput):
     
     return {"prediction": prediction[0]}
 
-# To run the app
+import nest_asyncio
+nest_asyncio.apply()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
