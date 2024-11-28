@@ -30,31 +30,31 @@ class PredictionPage extends StatefulWidget {
 
 class _PredictionPageState extends State<PredictionPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _sleepDurationController = TextEditingController();
   final TextEditingController _studyHoursController = TextEditingController();
-  final TextEditingController _screenTimeController = TextEditingController();
-  final TextEditingController _caffeineIntakeController = TextEditingController();
+  final TextEditingController _extracurricularHoursController = TextEditingController();
+  final TextEditingController _socialHoursController = TextEditingController();
   final TextEditingController _physicalActivityController = TextEditingController();
+  final TextEditingController _stressLevelController = TextEditingController();
   String _prediction = "";
 
   Future<void> _predict() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('YOUR_API_ENDPOINT/predict'),
+        Uri.parse('http://localhost:5000/predict'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'sleep_duration': double.parse(_sleepDurationController.text),
           'study_hours': double.parse(_studyHoursController.text),
-          'screen_time': double.parse(_screenTimeController.text),
-          'caffeine_intake': int.parse(_caffeineIntakeController.text),
-          'physical_activity': int.parse(_physicalActivityController.text),
+          'extracurricular_hours': double.parse(_extracurricularHoursController.text),
+          'social_hours': double.parse(_socialHoursController.text),
+          'physical_activity_hours': double.parse(_physicalActivityController.text),
+          'stress_level': _stressLevelController.text,
         }),
       );
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         setState(() {
-          _prediction = "Predicted Sleep Quality: ${result['predicted_sleep_quality'].toStringAsFixed(2)}";
+          _prediction = "Predicted CGPA: ${result['predicted_cgpa'].toStringAsFixed(2)}";
         });
       } else {
         setState(() {
@@ -68,7 +68,7 @@ class _PredictionPageState extends State<PredictionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sleep Quality Predictor'),
+        title: const Text('Student Lifestyle Predictor'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -76,17 +76,6 @@ class _PredictionPageState extends State<PredictionPage> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _sleepDurationController,
-                decoration: const InputDecoration(labelText: 'Sleep Duration (hours)'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter sleep duration';
-                  }
-                  return null;
-                },
-              ),
               TextFormField(
                 controller: _studyHoursController,
                 decoration: const InputDecoration(labelText: 'Study Hours'),
@@ -99,34 +88,44 @@ class _PredictionPageState extends State<PredictionPage> {
                 },
               ),
               TextFormField(
-                controller: _screenTimeController,
-                decoration: const InputDecoration(labelText: 'Screen Time (hours)'),
+                controller: _extracurricularHoursController,
+                decoration: const InputDecoration(labelText: 'Extracurricular Hours'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter screen time';
+                    return 'Please enter extracurricular hours';
                   }
                   return null;
                 },
               ),
               TextFormField(
-                controller: _caffeineIntakeController,
-                decoration: const InputDecoration(labelText: 'Caffeine Intake (drinks)'),
+                controller: _socialHoursController,
+                decoration: const InputDecoration(labelText: 'Social Hours'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter caffeine intake';
+                    return 'Please enter social hours';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _physicalActivityController,
-                decoration: const InputDecoration(labelText: 'Physical Activity (minutes)'),
+                decoration: const InputDecoration(labelText: 'Physical Activity Hours'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter physical activity';
+                    return 'Please enter physical activity hours';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _stressLevelController,
+                decoration: const InputDecoration(labelText: 'Stress Level (Low/Moderate/High)'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter stress level';
                   }
                   return null;
                 },

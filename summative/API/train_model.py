@@ -3,26 +3,31 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import pickle
 
-# Load dataset
-file_path = "Student_Lifestyle_Dataset.csv"
-data = pd.read_csv(file_path)
-
-# Inspect the first few rows to ensure proper loading
-print(data.head())
+# Load the dataset
+data = pd.read_csv("./Student_Lifestyle_Dataset.csv")
 
 # Define features (X) and target (y)
-X = data[["Study_Hours", "Extracurricular_Hours", "Sleep_Hours", "Social_Hours", "Physical_Activity_Hours", "Stress_Level"]]
-y = data["CGPA"]
+# Replace these columns with the relevant ones from your dataset
+X = data[[
+    "StudyHours",
+    "ExtracurricularHours",
+    "SleepHours",
+    "SocialHours",
+    "PhysicalActivityHours",
+    "StressLevel"
+]]
+y = data["GPA"]  # Replace "GPA" with the actual target column in your dataset
 
-# Split data into training and testing sets
+# Split into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Initialize and train the Linear Regression model
+# Train the model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Save the trained model to a .pkl file
+# Save the trained model
 with open("linear_regression_model.pkl", "wb") as f:
     pickle.dump(model, f)
 
 print("Model trained and saved as 'linear_regression_model.pkl'.")
+
