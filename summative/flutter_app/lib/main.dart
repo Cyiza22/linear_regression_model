@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sleep Quality Predictor',
+      title: 'Student Lifestyle Predictor',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -39,26 +39,36 @@ class _PredictionPageState extends State<PredictionPage> {
 
   Future<void> _predict() async {
     if (_formKey.currentState!.validate()) {
-      final response = await http.post(
-        Uri.parse('http://localhost:5000/predict'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'study_hours': double.parse(_studyHoursController.text),
-          'extracurricular_hours': double.parse(_extracurricularHoursController.text),
-          'social_hours': double.parse(_socialHoursController.text),
-          'physical_activity_hours': double.parse(_physicalActivityController.text),
-          'stress_level': _stressLevelController.text,
-        }),
-      );
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:5000/predict'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'study_hours': double.parse(_studyHoursController.text),
+            'extracurricular_hours': double.parse(_extracurricularHoursController.text),
+            'social_hours': double.parse(_socialHoursController.text),
+            'physical_activity_hours': double.parse(_physicalActivityController.text),
+            'stress_level': _stressLevelController.text,
+          }),
+        );
 
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          final result = jsonDecode(response.body);
+          setState(() {
+            // Ensure we're displaying a numeric GPA
+            double gpa = result['predicted_gpa'] is num 
+                ? (result['predicted_gpa'] as num).toDouble()
+                : 0.0;
+            _prediction = "Predicted GPA: ${gpa.toStringAsFixed(2)}";
+          });
+        } else {
+          setState(() {
+            _prediction = "Prediction Error: ${response.statusCode}";
+          });
+        }
+      } catch (e) {
         setState(() {
-          _prediction = "Predicted CGPA: ${result['predicted_cgpa'].toStringAsFixed(2)}";
-        });
-      } else {
-        setState(() {
-          _prediction = "Error making prediction";
+          _prediction = "Error: $e";
         });
       }
     }
@@ -78,7 +88,10 @@ class _PredictionPageState extends State<PredictionPage> {
             children: [
               TextFormField(
                 controller: _studyHoursController,
-                decoration: const InputDecoration(labelText: 'Study Hours'),
+                decoration: const InputDecoration(
+                  labelText: 'Study Hours (per week)',
+                  hintText: 'Enter total study hours per week',
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -89,7 +102,10 @@ class _PredictionPageState extends State<PredictionPage> {
               ),
               TextFormField(
                 controller: _extracurricularHoursController,
-                decoration: const InputDecoration(labelText: 'Extracurricular Hours'),
+                decoration: const InputDecoration(
+                  labelText: 'Extracurricular Hours (per week)',
+                  hintText: 'Enter total extracurricular hours per week',
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -100,7 +116,10 @@ class _PredictionPageState extends State<PredictionPage> {
               ),
               TextFormField(
                 controller: _socialHoursController,
-                decoration: const InputDecoration(labelText: 'Social Hours'),
+                decoration: const InputDecoration(
+                  labelText: 'Social Hours (per week)',
+                  hintText: 'Enter total social hours per week',
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -111,7 +130,10 @@ class _PredictionPageState extends State<PredictionPage> {
               ),
               TextFormField(
                 controller: _physicalActivityController,
-                decoration: const InputDecoration(labelText: 'Physical Activity Hours'),
+                decoration: const InputDecoration(
+                  labelText: 'Physical Activity Hours (per week)',
+                  hintText: 'Enter total physical activity hours per week',
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -122,7 +144,10 @@ class _PredictionPageState extends State<PredictionPage> {
               ),
               TextFormField(
                 controller: _stressLevelController,
-                decoration: const InputDecoration(labelText: 'Stress Level (Low/Moderate/High)'),
+                decoration: const InputDecoration(
+                  labelText: 'Stress Level',
+                  hintText: 'Enter Low/Moderate/High',
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter stress level';
@@ -133,7 +158,7 @@ class _PredictionPageState extends State<PredictionPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _predict,
-                child: const Text('Predict'),
+                child: const Text('Predict GPA'),
               ),
               const SizedBox(height: 20),
               Text(
